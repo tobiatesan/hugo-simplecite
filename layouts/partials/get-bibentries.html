@@ -1,20 +1,32 @@
 <!-- Load in the bib.json file as a page resource -->
 {{ $bibentries := "" }}
+{{ $bibLocal := "" }}
+{{ $bibParent := "" }}
 {{ $bibfilePath := "bib.json" }}
 {{ with try (.Page.Resources.Get $bibfilePath) }}
     {{ with .Err }}
         {{ errorf "Could not parse bib.json file at %q. Encountered the following error:" $bibfilePath . }}
     {{ else with .Value }}
-        {{ $bibentries = . | transform.Unmarshal }}
+        {{ $bibLocal = . | transform.Unmarshal }}
     {{ end }}
-{{ else with try (.Page.Parent.Resources.Get $bibfilePath) }}
+{{ end }}
+
+{{ with try (.Page.Parent.Resources.Get $bibfilePath) }}
     {{ with .Err }}
         {{ errorf "Could not parse bib.json file at %q. Encountered the following error:" $bibfilePath . }}
     {{ else with .Value }}
-        {{ $bibentries = . | transform.Unmarshal }}
+        {{ $bibParent = . | transform.Unmarshal }}
     {{ end }}
 {{ else }}
     {{ errorf "Could not find bib.json file at %q" $bibfilePath }}
+{{ end }}
+
+{{ if $bibParent }}
+    {{ $bibentries = $bibParent }}
+{{ end }}
+
+{{ if $bibLocal }}
+    {{ $bibentries = $bibParent }}
 {{ end }}
 
 <!-- Parse the bib.json file -->
